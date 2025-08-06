@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const {creerNote, lireNote, supprimerNote, supprimerNotes} = require('./../controllers/notesController');
+const authMiddleware = require('../middleware/auth');
+const notesController = require('../controllers/notesController');
 
-router.post('/', creerNote);
-router.get('/', lireNote);
-router.delete('/:id', supprimerNote);
-router.delete('/', supprimerNotes);
+router.use(authMiddleware); // toutes les routes notes nécessitent un token
+
+router.post('/', notesController.creerNote);
+router.get('/', notesController.lireNote);
+router.delete('/:id', notesController.supprimerNote);
+router.delete('/', notesController.supprimerNotes);
 
 module.exports = router;
