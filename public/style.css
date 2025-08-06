@@ -15,7 +15,6 @@ body {
   color: #333;
 }
 
-/* FORMULAIRE */
 form {
   width: 100%;
   max-width: 420px;
@@ -45,6 +44,8 @@ form label {
 }
 
 form input[type="text"],
+form input[type="email"],
+form input[type="password"],
 form input[type="number"] {
   padding: 12px 14px;
   font-size: 16.5px;
@@ -57,19 +58,18 @@ form input[type="number"] {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-form input[type="text"]::placeholder,
-form input[type="number"]::placeholder {
+form input::placeholder {
   color: #d0e6ff;
   font-style: italic;
 }
 
-form input[type="text"]:focus,
-form input[type="number"]:focus {
+form input:focus {
   background-color: rgba(255, 255, 255, 0.4);
   box-shadow: inset 0 0 8px rgba(255,255,255,0.7);
   outline: none;
 }
 
+form button,
 form input[type="submit"] {
   margin-top: 15px;
   padding: 14px 0;
@@ -84,18 +84,18 @@ form input[type="submit"] {
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
+form button:hover,
 form input[type="submit"]:hover {
   background-color: #e0e6ff;
   box-shadow: 0 8px 16px rgba(10, 67, 255, 0.55);
 }
 
-/* LISTE DES NOTES */
 #liste-notes {
   list-style: none;
   width: 100%;
   max-width: 420px;
   padding: 0;
-  margin: 0 auto;
+  margin: 0 auto 30px auto;
 }
 
 #liste-notes li {
@@ -116,17 +116,16 @@ form input[type="submit"]:hover {
   background-color: #f0f8ff;
 }
 
-/* MOYENNE */
 #moyenne {
   font-size: 26px;
   font-weight: 700;
   color: #0a43ff;
-  margin-top: 25px;
+  margin-top: 10px;
   text-shadow: 1px 1px 4px rgba(10, 67, 255, 0.3);
   user-select: none;
 }
 
-/* RESPONSIVE */
+/* Responsive */
 @media (max-width: 480px) {
   body {
     padding: 30px 15px;
@@ -137,12 +136,12 @@ form input[type="submit"]:hover {
     max-width: 100%;
   }
 
-  form input[type="text"],
-  form input[type="number"] {
+  form input {
     font-size: 15px;
     padding: 11px 12px;
   }
 
+  form button,
   form input[type="submit"] {
     font-size: 15px;
     padding: 12px 0;

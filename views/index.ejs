@@ -1,43 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <title>Calculateur de notes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculateur de notes sécurisé</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  
-  <form id="form">
-    <label>Matière<input type="text" id="title" placeholder="Matière"></label>
-    <label>Note<input type="number" id="note" placeholder="Note"></label>
-    <label>Coefficient<input type="number" id="coeff" placeholder="Coefficient"></label>
-    <input type="submit" value="Submit">
-  </form>
-  <!-- Ajoute avant le formulaire notes -->
 
-<div id="auth">
-  <h2>Connexion</h2>
-  <form id="login-form">
-    <input type="email" id="login-email" placeholder="Email" required />
-    <input type="password" id="login-password" placeholder="Mot de passe" required />
-    <button type="submit">Se connecter</button>
-  </form>
+  <div id="auth-section">
+    <h2>Connexion</h2>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required />
+      <input type="password" id="login-password" placeholder="Mot de passe" required />
+      <button type="submit">Se connecter</button>
+    </form>
 
-  <h2>Inscription</h2>
-  <form id="signup-form">
-    <input type="email" id="signup-email" placeholder="Email" required />
-    <input type="password" id="signup-password" placeholder="Mot de passe" required />
-    <button type="submit">S'inscrire</button>
-  </form>
-</div>
+    <h2>Inscription</h2>
+    <form id="signup-form">
+      <input type="email" id="signup-email" placeholder="Email" required />
+      <input type="password" id="signup-password" placeholder="Mot de passe" required />
+      <button type="submit">S'inscrire</button>
+    </form>
+  </div>
 
-  <ul id="liste-notes">
-    <!-- <li>tache</li>
-    <li>tache</li>
-    <li>tache</li> -->
-  </ul>
-  <h2 id="moyenne"></h2>
+  <div id="notes-section" style="display:none;">
+    <button onclick="logout()" id="logout-btn">Se déconnecter</button>
+
+    <form id="note-form">
+      <label>Matière
+        <input type="text" id="title" placeholder="Matière" required />
+      </label>
+      <label>Note
+        <input type="number" id="note" placeholder="Note" step="0.01" required />
+      </label>
+      <label>Coefficient
+        <input type="number" id="coeff" placeholder="Coefficient" step="0.01" required />
+      </label>
+      <button type="submit">Ajouter la note</button>
+    </form>
+
+    <ul id="liste-notes"></ul>
+    <h2 id="moyenne"></h2>
+  </div>
 
   <script src="main.js"></script>
 </body>

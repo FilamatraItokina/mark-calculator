@@ -1,124 +1,174 @@
-const form = document.getElementById('form');
-const inputTitle = document.getElementById('title');
-const inputNote = document.getElementById('note');
-const inputCoeff = document.getElementById('coeff');
+const tokenKey = 'token';
+
+// Elements DOM
+const authSection = document.getElementById('auth-section');
+const notesSection = document.getElementById('notes-section');
+
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const logoutBtn = document.getElementById('logout-btn');
+
+const noteForm = document.getElementById('note-form');
 const ul = document.getElementById('liste-notes');
-const h2 = document.getElementById('moyenne');
+const moyenneElem = document.getElementById('moyenne');
 
+// Utilitaire
 function getToken() {
-  return localStorage.getItem('token'); // Assure-toi que le token est stocké sous cette clé
+  return localStorage.getItem(tokenKey);
 }
 
-// Fonction pour récupérer et afficher la moyenne
-function updateMoyenne() {
-  const token = getToken();
-  fetch('/moyenne', {
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-    h2.textContent = `Moyenne: ${data.moyenne.toFixed(2)}`;
-  })
-  .catch(err => {
-    console.error("Erreur lors de la récupération de la moyenne :", err);
-    alert("Erreur lors de la récupération de la moyenne.");
-  });
+function setToken(token) {
+  localStorage.setItem(tokenKey, token);
 }
 
-// Fonction pour afficher une note dans la liste
-function afficherNote(note) {
-  const li = document.createElement('li');
-  li.textContent = `${note.title} - Note: ${note.note} - Coeff: ${note.coeff}`;
-  ul.appendChild(li);
-
-  li.addEventListener('dblclick', () => {
-    li.remove();
-
-    const token = getToken();
-    fetch('/notes/' + note.id, {
-      method: 'DELETE',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      }
-    })
-    .then(res => res.json())
-    .then(() => {
-      updateMoyenne();
-    })
-    .catch(err => {
-      console.error("Erreur lors de la suppression de la note :", err);
-      alert("Erreur lors de la suppression de la note.");
-    });
-  });
+function clearToken() {
+  localStorage.removeItem(tokenKey);
 }
 
-// Fonction pour récupérer et afficher toutes les notes
-function chargerNotes() {
-  ul.innerHTML = '';
-  const token = getToken();
-  fetch('/notes', {
-    method: 'GET',
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(note => {
-      afficherNote(note);
-    });
-  })
-  .catch(err => {
-    console.error("Erreur lors du chargement des notes :", err);
-    alert("Erreur lors du chargement des notes.");
-  });
+function showAuth() {
+  authSection.style.display = 'block';
+  notesSection.style.display = 'none';
 }
 
-// Fonction pour ajouter une note
-function ajouterNote(title, note, coeff) {
-  const token = getToken();
-  fetch('/notes', {
-    method: 'POST',
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
-      title: title,
-      note: note,
-      coeff: coeff
-    })
-  })
-  .then(() => {
-    chargerNotes();
-    updateMoyenne();
-  })
-  .catch(err => {
-    console.error("Erreur lors de l'envoi de la note :", err);
-    alert("Erreur lors de l'envoi de la note.");
-  });
+function showNotes() {
+  authSection.style.display = 'none';
+  notesSection.style.display = 'block';
 }
 
-// Événement de soumission du formulaire
-form.addEventListener('submit', (e) => {
+// ================== AUTH ==================
+
+signupForm.addEventListener('submit', async e => {
   e.preventDefault();
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
 
-  if (inputTitle.value === '' || inputNote.value === '' || inputCoeff.value === '') {
-    alert('Tous les champs sont obligatoires');
+  const res = await fetch('/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    alert('Inscription réussie, connecte-toi !');
+    signupForm.reset();
+  } else {
+    alert(data.message || 'Erreur inscription');
+  }
+});
+
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+
+  const res = await fetch('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    setToken(data.token);
+    loginForm.reset();
+    loadNotesPage();
+  } else {
+    alert(data.message || 'Erreur connexion');
+  }
+});
+
+logoutBtn.addEventListener('click', () => {
+  clearToken();
+  showAuth();
+});
+
+// ================== NOTES ==================
+
+noteForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const title = document.getElementById('title').value;
+  const note = parseFloat(document.getElementById('note').value);
+  const coeff = parseFloat(document.getElementById('coeff').value);
+
+  const token = getToken();
+  if (!token) {
+    alert('Connecte-toi d’abord');
     return;
   }
 
-  ajouterNote(inputTitle.value, parseFloat(inputNote.value), parseFloat(inputCoeff.value));
+  const res = await fetch('/notes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title, note, coeff }),
+  });
 
-  inputTitle.value = '';
-  inputNote.value = '';
-  inputCoeff.value = '';
+  if (res.ok) {
+    noteForm.reset();
+    afficherNotes();
+    afficherMoyenne();
+  } else {
+    const data = await res.json();
+    alert(data.message || 'Erreur ajout note');
+  }
 });
 
-// Initialisation : chargement des notes et de la moyenne
-chargerNotes();
-updateMoyenne();
+async function afficherNotes() {
+  const token = getToken();
+  if (!token) return;
+
+  const res = await fetch('/notes', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    alert('Erreur chargement notes');
+    return;
+  }
+  const notes = await res.json();
+
+  ul.innerHTML = '';
+  for (const note of notes) {
+    const li = document.createElement('li');
+    li.textContent = `${note.title} - Note: ${note.note} - Coeff: ${note.coeff}`;
+    ul.appendChild(li);
+  }
+}
+
+async function afficherMoyenne() {
+  const token = getToken();
+  if (!token) return;
+
+  const res = await fetch('/moyenne', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    moyenneElem.textContent = '';
+    return;
+  }
+  const data = await res.json();
+  moyenneElem.textContent = `Moyenne: ${data.moyenne.toFixed(2)}`;
+}
+
+function loadNotesPage() {
+  showNotes();
+  afficherNotes();
+  afficherMoyenne();
+}
+
+// Au chargement, afficher la bonne section
+window.addEventListener('DOMContentLoaded', () => {
+  const token = getToken();
+  if (token) {
+    loadNotesPage();
+  } else {
+    showAuth();
+  }
+});
